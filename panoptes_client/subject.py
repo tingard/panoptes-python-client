@@ -3,6 +3,7 @@ import requests
 import time
 
 from panoptes_client.panoptes import PanoptesObject, LinkResolver
+from panoptes_client.utils import batchable
 
 UPLOAD_RETRY_LIMIT = 5
 RETRY_BACKOFF_INTERVAL = 5
@@ -21,7 +22,8 @@ class Subject(PanoptesObject):
     )
 
     @classmethod
-    def batch_save(cls, subjects, batch_size=100):
+    @batchable(batch_size=10)
+    def batch_save(cls, subjects):
         savable_dicts = []
         for subject in subjects:
             if not isinstance(subject, Subject):

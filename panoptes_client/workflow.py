@@ -1,6 +1,7 @@
 from panoptes_client.panoptes import PanoptesObject, LinkResolver
 from panoptes_client.subject import Subject
 from panoptes_client.subject_set import SubjectSet
+from panoptes_client.utils import batchable
 
 
 class Workflow(PanoptesObject):
@@ -8,6 +9,7 @@ class Workflow(PanoptesObject):
     _link_slug = 'workflows'
     _edit_attributes = []
 
+    @batchable
     def retire_subjects(self, subjects, reason='other'):
         if type(subjects) not in (list, tuple, set):
             subjects = [ subjects ]
@@ -21,18 +23,16 @@ class Workflow(PanoptesObject):
             }
         )
 
-    def add_subject_sets(self, subject_sets, batch_size=100):
+    @batchable
+    def add_subject_sets(self, subject_sets):
         _subject_sets = self._build_subject_set_list(subject_sets)
 
-        for _subject_sets_batch in [
-            _subject_sets[i:i+batch_size]
-            for i in xrange(0, len(_subject_sets), batch_size)
-        ]:
-            self.post(
-                '{}/links/subject_sets'.format(self.id),
-                json={'subject_sets': _subject_sets_batch}
-            )
+        self.post(
+            '{}/links/subject_sets'.format(self.id),
+            json={'subject_sets': _subject_sets}
+        )
 
+    @batchable
     def remove_subject_sets(self, subject_sets):
         _subject_sets = self._build_subject_set_list(subject_sets)
         _subject_set_ids = ",".join(_subject_sets)
