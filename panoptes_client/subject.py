@@ -30,7 +30,12 @@ class Subject(PanoptesObject):
                 raise TypeError("Can't save non-Subjects")
             savable_dicts.append(subject._savable_dict())
 
-        responses, _ = cls.post('', json={
+        if not subjects[0].id:
+            save_method = cls.post
+        else:
+            save_method = cls.put
+
+        responses, _ = save_method.post('', json={
             cls._api_slug: savable_dicts
         })
         for subject, response in zip(subjects, responses[cls._api_slug]):
